@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import numpy
 
@@ -5,6 +7,7 @@ class LogFile:
 
     def __init__(self, path) -> None:
         self.path = os.path.abspath(path)
+        self.name = os.path.basename(self.path)
         self.freqlist, self.ir_inten, self.raman_act = self.read_data()
     
     def read_data(self):
