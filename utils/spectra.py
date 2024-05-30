@@ -5,11 +5,12 @@ import csv
 import numpy
 import scipy
 
-class Experimental_Spectrum:
+class Spectrum:
+
     def __init__(self, path):
         self.path = os.path.abspath(path)
-        self.frequencies, self.intensities = self.read_data()
-                   
+        self.read_data()
+    
     def read_data(self, d=","):
         frequencies = []
         intensities = []
@@ -24,27 +25,39 @@ class Experimental_Spectrum:
         if frequencies[0] > frequencies[1]:
             frequencies = frequencies[::-1]
             intensities = intensities[::-1]
-        
-        return numpy.array(frequencies), numpy.array(intensities)
+
+        self.frequencies = numpy.array(frequencies)
+        self.intensities = numpy.array(intensities)
 
     def normalize(self):
         max_intensity = self.intensities.max()
-        normalized_intensities = self.intensities / max_intensity
-        return normalized_intensities
+        self.intensities /= max_intensity
+
+    def export_csv(self, path):
+        with open(path, "w") as output:
+            output.write("Frequency (cm^-1), Intensity\n")
+            for i, j in zip(self.frequencies, self.intensities):
+                output.write(f"{i},{j}\n")
+    
+class Experimental_Spectrum(Spectrum):
+    def __init__(self, path):
+        Spectrum.__init__(self, path)
+        self.read_data()
     
     def interpolate(self, th_spectrum):
         interpolated_intensities = numpy.interp(th_spectrum.frequencies, self.frequencies, self.intensities)
         return interpolated_intensities
     
-    def correlation(self, th_spectrum, mode = "pearson"):
-        interpolated_intensities = Experimental_Spectrum.interpolate(th_spectrum)
+    def correlation(self, interpolated_intensities, th_spectrum, mode = "pearson"):
         if mode == "pearson":
             r = scipy.stats.pearsonr(interpolated_intensities, th_spectrum.intensities)[0]
         elif mode == "spearman":
             r = scipy.stats.spearmanr(interpolated_intensities, th_spectrum.intensities)[0]
+        else:
+            raise Exception("The correlation mode that was specified does not exist...")
         return r
     
-class Theoretical_Spectrum:
+class Theoretical_Spectrum(Spectrum):
     def __init__(self, freqlist, intlist, fmin, fmax, step, sigma, scale, mode="lorentz"):
         self.check_input([fmin, fmax, step, sigma, scale])
         self.fmin = fmin
@@ -59,7 +72,6 @@ class Theoretical_Spectrum:
         self.scaled_freqlist = freqlist * scale
         self.frequencies, self.intensities = self.generate_spectrum()
 
-
     def check_input(self, params):
         for param in params:
             if isinstance(param, str):
@@ -71,7 +83,7 @@ class Theoretical_Spectrum:
     def generate_spectrum(self):
         # Generate frequencies
         self.frequencies = []
-        for i in range(1, self.nstep + 1):
+        for i in range(0, self.nstep):
              freq = self.fmin + i * self.step
              self.frequencies.append(freq)
 
