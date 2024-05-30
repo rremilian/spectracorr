@@ -97,7 +97,7 @@ def main():
     write_spectral_data(th_log.freqlist, th_log.ir_inten, args.output)
 
     if th_log.raman_act.any():
-        write_output(f"Theoretical Log IR Data List:\n", args.output)
+        write_output(f"Theoretical Log Raman Data List:\n", args.output)
         write_spectral_data(th_log.freqlist, th_log.raman_act, args.output)
     
     write_output("====================================================================\n\n", args.output)
@@ -171,7 +171,6 @@ def main():
                 write_output(f"[{type}] Correlation calculation for scale factor {s} - DONE...\n", args.output)
                 file.write(f"{s},{r}\n")
             file.write("\n\n")
-
 
 if __name__ == '__main__':
     main()
