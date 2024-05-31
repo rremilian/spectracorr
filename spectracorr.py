@@ -34,6 +34,7 @@ def main():
     parser.add_argument("-m", "--mode", type=str, required=False, default="lorentz")
     parser.add_argument("--only-raman", action="store_true")
     parser.add_argument("--only-ir", action="store_true")
+    parser.add_argument("--do-not-save-spectra", action="store_true")
     parser.add_argument("--skip-correlation", action="store_true")
     parser.add_argument("-c", "--correlation-mode", type=str, required=False, default="pearson")
     parser.add_argument("-o", "--output-dir", type=str, required=False, default="output")
@@ -172,6 +173,8 @@ def main():
             file.write(f"Scale Factor, Correlation Factor --- {type}\n")
             for s in scale_factors:
                 sp = spectra.Spectrum(os.path.join(args.output_dir,f"{args.output_dir}-{type}-{s}.csv"))
+                if args.do_not_save_spectra:
+                    os.remove(os.path.join(args.output_dir,f"{args.output_dir}-{type}-{s}.csv"))
                 r = exp_spectrum.correlation(interpolated_exp_intensities, sp, mode=args.correlation_mode)
                 if r > r_max:
                     r_max = r
