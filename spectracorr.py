@@ -5,6 +5,7 @@ import argparse
 import numpy
 import shutil
 from datetime import datetime
+
 from utils import logparser
 from utils import spectra
 
@@ -41,9 +42,9 @@ def main():
 
     args = parser.parse_args()
 
-    dt = datetime.now().strftime('%d-%m-%Y %H:%M:%S ')
+    dt_start = datetime.now()
     print("Starting analysis using SpectraCorr...")
-    print(f"Date: {dt}")
+    print(f"Date: {dt_start.strftime('%d-%m-%Y %H:%M:%S ')}")
 
     if args.description:
         print(f"Description: {args.description}")
@@ -165,6 +166,7 @@ def main():
         to_do = ["IR", "Raman"]
         interpolated_exp_intensities = exp_spectrum.interpolate(th_ir_spectrum)
 
+    summary = []
     for type in to_do:
         r_max = -1
         print(f"Correlation Factors - {type}")
@@ -184,7 +186,24 @@ def main():
             file.write("\n\n")
         print("")
         print("==================MAXIMUM CORRELATION COEFFICIENT==================")
-        print(f"Maximum correlation coefficient for {type} is {r_max:.3f} at scale factor {s_max}...\n")
+        message = f"Maximum correlation coefficient for {type} is {r_max:.3f} at scale factor {s_max}..."
+        summary.append(message)
+        print(f"{message}\n")
+
+        print("==============================SUMMARY==============================")
+        dt_finish = datetime.now()
+        duration = dt_finish - dt_start
+        total_seconds = round(duration.total_seconds(), 0)
+        e_hours = round(total_seconds / 3600, 0)
+        e_minutes = round(total_seconds / 60, 0) - e_hours * 60
+        e_seconds = total_seconds - e_hours * 3600 - e_minutes * 60 
+        print(f"Description: {args.description}")
+        for m in summary:
+            print(m)
+        print(f"Elasped time: {duration.days} days {e_hours} hours {e_minutes} minutes {e_seconds} seconds...\n")
+        print(f"Normal termination of SpectraCorr at {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
+
+
 
 if __name__ == '__main__':
     main()
